@@ -1,0 +1,465 @@
+---
+title: "Measles"
+author: "Clifford"
+date: "December 13, 2016"
+output: pdf_document
+bibliography: References.bib
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# INTRODUCTON AND LITERATURE REVIEW
+
+
+## Introduction
+Then the Lord said to Moses and Aaron, "Take handfuls of soot from a furnace and have Moses toss it into the air in the presence of Pharaoh. It will become fine dust over the whole land of Egypt, and festering boils will break out on men and animals throughout the land."—Exodus 9:8–9.
+
+Mankind’s woes with infectious diseases is one of the few well documented facts in history, as it has greatly imparted on civilizations. Now, Public health personnel, Stakeholders and Society as whole invest resources to study and understand the dynamics of epidemics. Mathematical tools have been used to describe the dynamics of infectious diseases since  Daniel Bernoulli's smallpox model in 1766. The most popular of these are Mechanistic models, in which assumptions are made about the nature of the underlying disease dynamics, based on research and observations. With these assumptions we often have a system of equations, most often these are differential equations. This has been to great success. The eradication of small pox testifies to this fact.
+
+## Mathematical Models
+
+The role Mathematical models play in studying infectious disease dynamics cannot be overstated. The most common of these Mechanistic models are the compartmental models. These are models that group hosts, based on their states at infection [@Mishra10]. Lets take for example tuberculosis, the stages at infection here include; people who dont have the disease, those who have but are not yet spreading the disease, those who have and are spreading the disease, and those who have recovered from the disease. More generally,the most common groups (compartments) are the Susceptible, Exposed, Infectious, Recovered/Removed.
+
+ *  Susceptible(S): This is the state at which the host can be, but isn't infected.
+ *  Exposed(E): This is the state at which the host is infected, but not infectious.
+ *  Infectious(I): This is the state at which the host is both infected and infectious
+ *  Recovered/Removed(R): This is the state at which the host is either recovered from the disease, immune or has been isolated.
+
+Assumptions are made about the transition(flow) of hosts from one compartments to the other, given these assumptions we have a system of differential equations whose solution represent the disease dynamics. Sometimes after the development of the model, the realisations can be incompatible with observation, this gives strong indication of a major violation by an assumption, and this is investigated and rectified. For most of these compartments, the flow out is assumed to be proportional to the size of the compartment. That is if $K$ is a compartment and $r$ is the rate of movement out of $K$, then $K^{'}=-rK$ , which implies that $K(t)=exp\{-rt\}$. Thus $1/r$ is the average length of time in $K$. [@Hethcote00]
+
+However, for the susceptible compartment we can have more complicated outflows, since this is related to infection. By nature, Transition Dynamic models have force of infection as dependent on prevalence [@Mishra10] (The force of infection is the per capita incidence rate of infection per susceptible host).This sometimes leads to non-linearity in transmission. There are two popular forms of incidence; Standard Incidence and Mass Action.
+
+ 1.  Standard Incidence: Here we assume that the average rate of contact $\beta$ is constant. Thus by deduction our incidence is $(\beta S I)/N$. Where $N$ is the population size.
+ 2.  Mass Action: We assume that the average rate of contact is proportion to the population size $N$. This also gives us incidence as $\beta S I$. [@Hethcote00]
+
+Assumptions do not only help in the model formulation, they also help in simplifying the model. Even with that most of the differential equations encountered in epidemiology are complex enough so that, it is difficult to find an analytic solution. However, without the analytic solution it still possible to study the system using qualitative methods and simulations. One of the main focal points of interest are bifurcation points. This are simply points at which before and after, the system changes its dynamics. The Basic Reproductive number $R_{0}$ is such a threshold point. This is the average number of secondary infections from the introduction of an infective into a completely susceptible population. When the Basic reproductive number is less than 1 [greater than 1], we have the disease-free equilibrium (the state of disease eradication) to be asymptotically stable [unstable]. This Bifurcation parameter is of interest, through interventions like vaccination, we can change the magnitude of this parameter. And if we are able to reduce it to less than one, as in smallpox then we are going to have the disease on decline and eradicated.
+
+
+## Childhood deseases
+
+In quest to adequately studying the dynamics of infectious diseases, childhood diseases give a rare opportunity. Not only are its dynamics interesting as we'd later see, but the rich source of data available, helps us evaluate existing models and build mathematical and statistical tools to improve them and also, fit these models to new data to test their predictive ability. One such well-studied childhood disease is measles.  Measles is a childhood disease with well-studied dynamics. Its relatively high infection rate, meant that in the pre-vaccination period, almost everyone was infected by age 20 [@Quadros04]. This made it of interest to stakeholders in most countries, hence a rich data is available on measles for most developed countries[@Grenfell02]. Measles is also interesting to epidemiologists because it exhibits both episodic and endemic dynamics (Barlett 1957).
+
+Before we discuss and compare the existing models for measles dynamics, let’s take a look at the biology and history behind the disease.
+
+
+# Measles
+
+Measles is an infectious childhood disease caused by the ravioli virus of the Morbilli group of viruses. The mode of infection can be airborne (coughs and sneezes from an infected person), and also through direct contact to infected or exposed objects. The virus is infectious when it comes into contact with nose, mouth, eyes and skin. This makes it highly contagious.
+7-18 days after exposure, symptoms are manifested. Thus the length of the exposed period is usually 8-10 days. The length of the infectious period is 8 days and this is between 4 days after the rush starts till 4 days after the rush. other symptoms are:
+
+ *  Fever anorexia, cough and irritability
+ *  Watery and red eyes with running nose.
+
+People often recover fully from measles in 2 weeks, though it sometimes lasts for 3 weeks. Measles on its own doesn’t have disease related fatalities, however it can be very fatal to infants, people with weakened immune system from HIV and Malnutrition. 157700 people are recorded to have died from measles in 2011, combined with it been the leading cause of death with in children show how fatal it can be.
+
+
+There is no cure for measles, as stated above most people recover naturally from it. However, there is a very effective vaccine  with a vaccine efficacy between 95% to 98% for people 6 months and older, since maternal imunity transfered to babies can interfere with vaccine efficacy [@Quadros04]. Yet, measles has made a comeback though it was eradicated from certain regions like the Americas. This is because  not everyone is and can be vaccinated:
+
+ 1. Some people have vaccine allergies
+ 2. Infants can be too young to be vaccinated
+ 3. HIV and other disease can weaken the immune system of host, and this makes vaccination life threatening
+ 4. A much recent campaign by "Anti-Vaxxers" against vaccination because it is rumored to cause autism in infants.
+
+Measles is very infectious; it can take just one infectious person to start an outbreak. An infected person has a 90% chance of infecting unvaccinated people (i.e. up to 12 to 18 person). However, due to the fact that measles vaccination is almost perfect, vaccination below a critical value for a region is enough to attain herd immunity. This has been effective foe the Region of the Americas.
+
+### Mechanistic model (Prevaccination)
+
+lets consider a simple mechanistic SEIR model with vaccination . Let the number of births be $\mu_{b}$, the death rate be $\mu$, the transmission rate be $\beta$ , the lenght of the latent period be $\lambda$, and the average lenght of infectiousness be $\gamma$. The expression on the right hand side for each state indicates the instantaneous rate of change of the states density.
+The positive terms represent the growth of that density, likewise, the negative terms represent the decline, thus for the first differential equation, we have $\mu_{b}(1-v)$ to be the inflows into the susceptible compartment i.e. the number of births of unvaccinated  children, $\beta IS/N$  the infected outflow and $\mu S$ the number of susceptibles that die. We also assume standard incidence.
+
+$$S'=\mu_{b}(1-v)-\beta IS/N -\mu S$$
+$$E'=\beta SI/N - (\lambda + \mu)E$$
+$$I'= \lambda E - (\gamma +\mu)I$$
+$$R' = \gamma I - \mu R + \mu_{b}v$$
+
+
+$$ S(0) \geq 0 , E(0) \geq 0 , I(0) \geq 0 , R(0) \geq 0$$
+
+All parameters above are non negative.
+
+
+#![Model Schematic](image1.png)
+
+Before we can analyse and evaluate how good the model is, we first have to ensure that the model is well posed and it atleast has a solution.
+
+#### INVARIANCE OF THE NON NEGATIVE CONE
+
+To ensure that the model is well posed we have to verify that these states representing population densities will not be negative given non negative initial condition.That shows that solution curves with non negative initial condition remain in the positive cone 
+$$\{ T={(S,E,I,R) \mbox{ }|\mbox{ }  S(t)\geq 0, E(t)\geq 0, I(t)\geq 0, R(t)\geq 0 , \mbox{  }S(t)+E(t)+I(t)+R(t)=N(t)} \}$$. To do this we examine the behavior of states on the boundary of the positive cone.
+
+1.  When $S(t)=0$
+    $$S'=\mu_{b}(1-v) $$
+    Since  the right hand side is greater than zero, when the density of susceptibles gets to zero it immediately jumps up.
+    
+2.  When $E(t)=0$
+    $$E'=\beta SI/N $$
+    Since  the right hand side is greater than or equal to zero, when the density of exposed gets to zero it immediately jumps up
+    or remains at 0 depending on the density of suscebtibles and infected.
+    
+3.  When $I(t)=0$
+    $$I'= \lambda E $$
+    Since  the right hand side is greater than or equal to zero, when the density of infected decreases to zero it also rises or remains 
+    at 0 depending on the density of the exposed.
+    
+4.  When $R(t)=0$
+    $$R' = \gamma I + \mu_{b}v$$
+    Since  the right hand side is greater than zero, when the density of recovered gets to zero it immediately jumps up.
+    
+    
+Thus, the positive cone is invariant.
+
+
+### Existence and Uniqueness
+Let 
+$$f(S,E,I,R)= \begin{bmatrix}
+ \ \
+ \mu_{b}(1-v)-\beta IS/N -\mu S \\[0.3em]
+\beta SI/N - (\lambda + \mu)E \\
+\lambda E - (\gamma +\mu)I \\
+ \gamma I - \mu R + \mu_{b}v
+\end{bmatrix}$$
+
+$f$ is continuous and $f^{\prime}$  is continuous at all points in its domain, thus $f$ is **Lipschitz** . By locally Lipschitz and continuity we have that the **solution exists and is unique**.
+
+
+### Solutions are Bounded
+To show that the solutions of this system exist for all time, we show that solutions are bounded. Adding the right hand sides of the above system of differential equations, we obtain
+$$ N' = \mu_{b} - \mu N \\
+   N(0)=N_{0}$$. 
+This differential eqaution has analytical solution as $$N(t)=N_{0} e^{-\mu t} + \frac{\mu_{b}}{\mu}$$. Thus since $N(t)=S(t)+I(t)+E(t)+R(t)$, and the limiting value of $N(t)$ is thus $\frac{\mu_{b}}{\mu}$, we have that the solutions are bounded and exist for all time. The Disease Free equilibrium (D.F.E) is evaluated to be 
+$$\big(\frac{\mu_{b}(1-v)}{\mu},0,0,\frac{\mu_{b}}{\mu}v \big)$$
+
+#PARAMETER ESTIMATES OF MODEL AND REALISATION !!!
+
+#### The Basic Reproduction Number
+With states at infection being $\{E,I\}$ we use the next generation matrix to find the basic reproductive number. Consider
+$$
+E'=\beta SI/N - (\lambda + \mu)E \\
+I'= \lambda E - (\gamma +\mu)I \\
+$$
+if we decompose the  above as $X'=[T+\Sigma ]X$, where $T$ is for transmission i.e. the birth of newly infected, and $\Sigma$ is for transition from one compartment to the other,  the $R_{0}$ is the dominant eigenvalue of $K=-T\Sigma^{-1}$. Hence, we have our $R_{0}$ as $$\frac{\lambda \beta }{( \lambda + \mu)(\gamma + \mu)}$$.
+
+#### Model with Seasonal Forcing
+As can be seen from the above  the dynamics of prevalence from the model doesnt match that observe, the seasonally (i.e. periodic nature) of prevalence isnt captured. We consider a modification of the model with seasonal forcing. Seasonal forcings illustrates the dynamic nature of certain parameters (in this case incidence).  In the above model  we assumed standard incidence with average rate of contact constant. We now use a sinusoidal functions for the average rate of contact. We have the new model to be:
+
+$$S'=\mu_{b}(1-v)-\beta_{1}\big(1 + \beta_{2} \cos(2 pi (t - \phi))\big) \frac{SI}{N} -\mu S$$
+$$E'=\beta_{1}\big(1 + \beta_{2} \cos(2 pi (t - \phi))\big) \frac{SI}{N} - (\lambda + \mu)E$$
+$$I'= \lambda E - (\gamma +\mu)I$$
+$$R' = \gamma I - \mu R + \mu_{b}v$$
+
+
+$$ S(0) \geq 0 , E(0) \geq 0 , I(0) \geq 0 , R(0) \geq 0$$
+All parameters above are non negative.
+
+The analysis of the system with seasonal forcing is almost identical to the one without seasonal forcing except for the stability analysis with require a more complicated method (Floquet Multipliers).
+
+### Modeling Measles Outbreaks [@Jansen05]
+
+As mention above the dynamics of an infectious disease is largely dependent on the Basic reproductive number $R_{0}$. When the $R_{0}>1$ the disease establishes itself in the host population and remains endemic, when $R_{0}<1$ the disease eventually dies out of the population. Considering the $R_{0}$ of the  model below (i.e. $R_{0}=\beta /\lambda$),
+
+
+$$S'=-\beta IS$$
+$$I'= \beta SI - \gamma I$$
+$$R' = \gamma I $$
+with $S+I+R=1$ (A scaled model).
+
+
+  After introducing vaccination into the model the Basic reproductive number reduces to $R_{c}=\beta (1-c)/\lambda = R_{0}(1-c)$, where $c$ is the number of vaccinated people in the population. If we extend this model to include demography and vaccination rate ($v$),we get
+$$S'= \mu N -\beta IS/N -(\mu+v)S $$ 
+
+$$I'= \beta SI/N - (\gamma+ \mu) I$$ 
+
+$$R' = \gamma I + vS - \mu R$$
+with $S+I+R=N$ (Unscaled).
+ This system however displays stochastic effects when $R_{0}$ approaches 1. For a supercritical system with $R_{0}$ approaching 1 we have an initially stochastic phase with phases out to a deterministic one. On the other hand, for the subcritical system we have the system demonstrating strong stochastic dynamics. To study the stochastic model for measles outbreaks, a stochastic model was formed with the following assumptions on the latter model:
+
+ 1. There is a large host population and its size will not be affected by the disease dynamics
+ 2. There are no vital dynamics and vaccination rate is set to 0 during the epidemic. ie the proportion of the vaccinated remains ($c$).
+
+
+Assumption 2 is because of the relatively short span of epidemics as compared to demographic processes. This assumption reduces the model to a birth and death process with birth as $\lambda R_{c}$ and death as $\lambda$. And it is easy to derive an expression for the expectation and variance of the number of infected hosts, $I(t)$.
+
+
+
+
+Though the time between jumps is exponentially distributed, to derive the size distribution of outbreaks, this was discarded and the time between jumps was fixed at 1, to simplify the model. The Gillespie algorithm was them use for obtain the probabilities of entering and leaving the initial state, which was $\frac{R_{c}}{R_{c}+1}$ and $\frac{1}{R_{c}+1}$ resp. The probability of an outbreak a certain size $x$ or larger is given by
+
+$$\sum\limits_{x=n}^\infty q(x) = \max\big(0,1-\frac{1}{R_{c}} \big) + \frac{(4R_{c})^{n-1}(\Gamma(n-.5))}{(1+R_{c})^{2n-1}*\sqrt{\pi}n!} _{2}F_{1}\big(1,n-.5,n+1,\frac {4R_{c}}{(1+R_{c})^2}\big)$$
+
+Where $_{2}F_{1}$ is the hypergeometric function, and $q(x)$ is the probability of an outbreak a certain size $x$.
+A recent number of measles outbreak in UK as a result of the MMR scare can well be explain by the above dynamics. As the estimated $R_{c}$ jumps from 0.35 to 0.7, before and during the scare.
+
+
+
+
+
+
+
+
+## Time series modelling of childhood diseases: a dynamical systems approach [@Finkenstadt00]
+
+
+### Susceptible Reconstruction 
+We will be using measles incidence data of the UK and Wales. The data used in the Grenfell Discrete time Model from 1944-1966. However the data available to  is from 1948-1966. Thus the analysis will be done on the later years.  However because of a setback with initial conditions of the susceptible reconstruction, we use the data of 1948 as the burn in period. Hence data from 1949 unward will be considered in our estimation. Below is a graph of Incidence and Births for the given preiods.
+
+```{r, echo=FALSE}
+t = seq(0,9, by = 9/(468))[1:(468)] 
+IData = read.table(file.choose())
+IData = IData[2:469,2]
+BData = read.table(file.choose())
+BData = (BData[,2])/13 #Data is recorded quaterly, thus the resulting data is weekly
+BData = rep(BData, each = 13)
+
+```
+```{r Birth and Incidence, fig.width=3, fig.height=3,echo=FALSE}
+plot(t,BData, type="l", col="blue")
+
+plot(t,IData, type="l", col="red")
+```
+
+ Data observed is only of incidence, thus there is no data available for the number of subsceptibles at a particular point in time, and even the incidence data collected is only partially observed, ie there is underreporting. To address this, Susceptible Reconstruction Algorithm is used to reconstruct the dynamic of the unobserved susceptibles from birth and partially observed incidence data. This is done by regressing cumulative births and cummulative case notification. An assumtion is made of a constant reporting rate through time and this is estimated about 56.8%. 
+
+The dynamics of the susceptible class can be described by 
+$$S_{t} = B_{t-d} + S_{t-1} - I_{t} + U_{t}$$
+$B_{t}$ being the number of Births at time $t$, with $d$ corresponding to a small delay that allows maternal immunity to dwindle. For measles its approximately 8 weeks.$S_{t}$ and $I_{t}$ are the number of susceptibles and infected at time $t$ respectively .We also have addictive error factor $U_{t}$, with $E(U_{t}) = 0$ and $Var(U_{t}) = \sigma^{2}_{U}$. For the transmission equation we have 
+$$I_{t}=r_{t}I_{t-1}^{\alpha_{1}}S_{t-1}^{\alpha_{2}} \epsilon_{t}$$.
+Here we assume multiplicative error for the total error is most likely to depend on the magnitude of the model values. We also have $E( \ln (\epsilon_{t})) = 0$ and $Var( \ln (\epsilon_{t})) = \sigma^{2}_{\epsilon}$. $r_{t}$ is a factor of proportionality that varies with time with a period of a year. $\alpha_{1} \mbox{ and } \alpha_{2}$ are mixing parameters, when $\alpha_{1} = \alpha_{2} =1$ we have homogeneous mixing.
+
+### Reconstructing the Susceptible dynamics.
+The Exposed and Infected period for measles last for 2 weeks then its followed by a life long immunity. Because the disease time scale is 2 weeks we aggregate the data bi-weekly. Thus the infected persons at time $t$ are related to contacts from time $t-1$, and also effect the number of infected at $t+1$.
+
+ The number of true cases is proportional to the number of reported cases, i.e. $I_{t} = \rho_{t} C_{t}$, with $C_{t}$ the number of reported cases and $\rho_{t} \geq 1$ a random variable with $E(\rho_{t})=\rho$. Thus we have our susceptible equation as
+$$S_{t} = B_{t-d} + S_{t-1} - \rho_{t} C_{t} + U_{t}$$
+
+Letting $Z_{t}=S_{t}- \bar{S}$ , where $E(S_{t})=\bar{S}$ we get $E(Z_{t})=0$, subtracting $\bar{S}$ from both hannd side of the equation (The deviations of $S_{t}$ are recursively the same for $Z_{t}$) gives
+$$Z_{t} = B_{t-d} + Z_{t-1} - \rho_{t} C_{t} + U_{t}$$
+
+Successively iterating the above equation gives us, 
+$$
+Z_{t} = Z_{0}+\sum_{i=1}^{t} B_{i-d} - \sum_{i=1}^{t} \rho_{i} C_{i} + \sum_{i=1}^{t} U_{i}
+$$
+
+
+This is thus free from the autoregressive nature of our initial subsebtible requation. We reparametize our model with
+$$
+X_{t} = \sum_{i=1}^{t} C_{i} \mbox{ , }  Y_{t} = \sum_{i=1}^{t} B_{i-d} \mbox{ , } 
+U_{t} = \sum_{i=1}^{t} u_{i} \mbox{ , }  R_{t} = \sum_{i=1}^{t} (\rho_{i}-\rho) C_{i} \mbox{ .} \\
+$$
+
+for  $t=1,...,n$ then the following are random processes.
+$$
+R_{t} = R_{t-1} + (\rho_{t}-\rho) C_{t}\\
+U_{t} = U_{t-1} + u_{t}
+$$
+
+With the new notation we have, our regression equation as 
+$$
+Y_{t} = -Z_{t} + \rho X_{t} + R_{t} + Z_{t} - U_{t}
+$$
+
+
+```{r, echo= FALSE}
+time = seq(0,9, by = 9/(226))[1:(226)] 
+
+#Bi-weekly dataset
+NewData = cbind(IData,BData)
+
+```
+```{r, echo=FALSE}
+Biweekly=function(Data){
+  n=nrow(Data)/2
+  m=ncol(Data) 
+  mat = matrix( ,n,m)
+  for (i in 0:n - 1 ){
+    mat[i + 1,]= rep(0, m)
+    for (j in 1:2) {
+      x = (2*i)+j
+      mat[i+1,] = c(mat[i+1,]) + c(Data[x,])
+    }
+  }
+  return(mat)
+}
+
+Cumulative = function(Data){
+  n=nrow(Data)
+  m=ncol(Data)
+  Dta=matrix( ,n,m)
+  Dta[1,] = Data[1,]
+  for (i in 2:n){
+    Dta[i,] = Dta[i-1,] + Data[i,]
+  }
+  
+  return(Dta)
+}
+```
+
+A subset of the Dataset can be seen from the Data below, with time, Culmulative Incidence, Culmulative Birth and Culmulative Error.
+```{r Table of Data, echo=FALSE}
+Fdat = Biweekly(NewData)
+
+sigmaU = 1
+set.seed(143)
+U = rnorm(226,0,sd=sigmaU)
+Fdat.d = cbind(Fdat[-(227:234),1],Fdat[-(1:8),2],U)
+
+Fdat1 = Cumulative(Fdat.d) # Adjusting for the  delay caused by maternal immunity
+
+NewData1 = cbind(Time=time,CIncidence=Fdat1[,1],CBirths=Fdat1[,2], U=Fdat1[,3])
+
+NewData2 = as.data.frame(NewData1 )
+head(NewData2)
+
+```
+ 
+Assuming a constant reporting rate and noise free data i.e $U_{t} \approx 0$ we have a simple linear relation of culmumative incidence on culmulative birth. A point estimate of the average reporting rate is the reciprocal of the  estimate of the slope. A summary of the simple linear regression and Analysis of Variance can be seen below.  
+
+```{r, echo=FALSE}
+fit <- lm(CBirths ~ CIncidence, data=NewData2)
+summary(fit) # show results
+plot(predict(fit)~CIncidence, data = NewData2)
+```
+
+```{r, echo=FALSE}
+
+confint(fit, level=0.95) # CIs for model parameters 
+anova(fit) # anova table 
+# covariance matrix for model parameters 
+```
+
+We have our esitmate of the slope to be 1.488 , corresponding to a 67.2% average reporting rate. A 95% confidence interval for the average repoting rate is given as (66.29%,66.28%). All regression related tests were significant, and R-squared:  0.9887 signifies a strong possitive linear relation, with the regression model explaining 98.87 percent of the error.
+The purpose of the regression equation is to estimate the Residuals , which about 0 has the same dymanics as $S_{t}$ about $\bar{S}$. And also the reporting rates $\rho_{t}$.  The estimates by [@Finkenstadt00] is a slope of 1.76 corresponding to a reporting rate of 56.8%. 
+
+
+```{r, echo=FALSE}
+# diagnostic plots 
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page 
+plot(fit)
+```
+
+
+
+Below are plots of the estimated residuals both with noice and without noise.
+```{r, echo=FALSE}
+Resid.noisefree=as.vector(residuals(fit))# residuals
+plot(Resid.noisefree~time, type="o", col="blue")
+Resid.noise=as.vector(residuals(fit)) + NewData2$U # residuals with noise
+plot(Resid.noise~time, type="o", col="blue")
+```
+
+
+
+# Local Regression analysis
+With the simple linear regression, we assumed a constant reporting rate. This however isnt realistic, to get a better address this we rather restict the constant reporting rates to within each of the bi-weeks. We therefore perform local regression analysis and this also gives us a better fit.  " references " and LRA.
+
+
+```{r, echo=FALSE}
+fit.loess <- loess(CBirths ~ CIncidence, data=NewData2, degree = 1, span = 1.49992)
+summary(fit.loess) # show results
+
+```
+
+```{r, echo=FALSE}
+Resid.loess=as.vector(fit.loess$residuals)+ NewData2$U# residuals
+plot(Resid.loess~time, type="o", col="blue")
+```
+
+```{r, echo=FALSE}
+fit.loess$kd
+```
+
+
+
+```{r, echo=FALSE}
+require(locpol)# Package for estimating the parameters of local regression.
+d <- data.frame(x = NewData2$CIncidence)
+d$y <- NewData2$CBirths
+h <- denCVBwSelC(log(d$x), kernel = gaussK)
+xeval <- log(d$x)
+lpest1 <- locPolSmootherC(log(d$x),log(d$y) , xeval, bw = h , 1, gaussK)
+mean(lpest1$beta1[-c(1,2)])
+lpest1
+plot(log(d$x),log(d$y))
+```
+
+
+```{r, echo=False}
+attach(lpest1)
+dev = beta1 * exp(beta0) * (x)^(beta1 - 1)
+finalData = cbind(x, dev, Resid.loess)[-(1:2),]
+tail(finalData)
+```
+
+
+
+```{r}
+finalData
+```
+
+
+
+
+
+
+
+
+
+
+
+
+**"Work in progress!!!!!!!"**
+
+#![Model Schematic](Finkenstadt.png)
+ 
+## Dynamics of Measles Epidemics (Estimation and scaling of transmission Rates using a TSIR Model) [@Grenfell02] 
+
+
+A study of the pre-vaccination era in UK shows two main dynamics; the endemic dynamics with periodicity which is exhibited in Large populations and the episodic outbreaks exhibited in smaller populations. The threshold differentiating this large and small population of hosts is estimated to be ~300000-500000. It is realized that endemism (The persistence of the disease in the host population) is dependent on the $R_{0}$ and also the susceptible replenishment rate (Grenfell and Harwood 1997). However, for non-persistent diseases, new outbreaks are dependent on reintroduction of the disease into the host population (Cliff et al 1993). A TSIR (Time Series SIR) Model was use to explore the balance between noise and episodic dynamics. The advantages of this model include
+1. It can be scaled by population size to produce endemic and episodic dynamics
+2. It bridges the gap between theoretical model and empirical data.
+
+This model includes **seasonal forcing corresponding to the start of the school year** *(Seasonal forcing explains the periodicity of endemic dynamics) *. Also non-linearity in contact rates are allowed. The most relevant state variables consider are the number of infected and susceptible at any time $t$. The approach used was to generate the number of susceptible using the Susceptible Reconstruction Algorithm proposed by Finkenstadt and Grenfell (2000), and the record of birth and deaths during the fitting period.
+
+There are some obstacles with this model, one of this is the Susceptible Reconstruction Algorithm is less reliable in the early part of the time series, because the "initial conditions" are difficult to estimate without some allowances.
+The model was fitted to weekly data from 60 cities in the UK, collected weekly from 1944-1966. The data was aggregated on a 2 wk. interval to match the time scale of the disease. The rates are assumed fixed within this interval, thus the number of secondary cases from a single infection is geometrically distributed (Kendall 1949). Together with the assumption of independence the birth-death process will follow a negative binomial distribution (Kendall 1949). 
+$$I_{t-1}~NB(\lambda_{t+1},I_{t})$$
+
+with expectation $a$ and clumping parameter $b$. and $$ S_{t+1}=S_{t}+B_{t}-I_{t+1}$$
+with this the model is fitted to data.
+
+
+
+## Likelihood-based estimation of continous-time epidemic models from time-series data [@Cauchemez07]
+
+Likelihood based estimation of parameters for our mechanistic models will be straight forward if infection and removal times are observed for each incident, however this isn’t possible because the available data is partially observed and aggregated often weekly. Though data augmentation methods have been used to tackle the missing data problems, this increases the complexity of likelihood based estimation when the number of missing data is huge.
+
+
+TSIR model though fits well to data in some cases, makes strong assumptions which are not always applicable. One of such assumptions is that the epidemic and data collection processes should have the same time scales. This results from the discretization of a continuous time system because the case counts are usually weekly, and this is quite good if each time period is one generation period. Since TSIR models are unable to estimate the generation times (delay between infection of a case and their typical secondary case) of the disease they assume that the generation time is equal to the observation interval (or a constant multiple of it), which for the measles model above is taken to be two weeks. However, this is often not the case and continuous-time models are free of such constraint.
+
+This model is applicable when we either have temporally aggregated datasets, and the number of size of underreporting is too large to use data augmentation techniques or the epidemic and data collection have different time scales.
+
+The approach involves tackling missing data by augmenting the data with latent state at the beginning of each observational period. The relation between the latent states are derived from a Cox-Ingersoll-Ross process which copies the usual SIR process. The Metropolis-Hastings MCMC sampling is used to explore the joint posterior distribution of augmented data and parameters.
+
+This continuous-time series model is unable to estimate generation times of measles accurately from observation data, though it does well for simulated data if the observation interval is less than 2.5 times the generation time.
+
+##  Plug-and-play inference for disease dynamics [@He10]
+
+Continuous-time SIR models adopts diffusion processes to implement MCMC, this breaks down in small populations. Several models make assumptions, and this makes them only locally valid. On the other, plug-and-play techniques makes little or no assumptions that interfere with the hypothesis of interest. This is because it operates basely on simulation from the dynamic model, and that brings its only disadvantage, it is computationally expensive. Two distinctive features about Plug-and-play methods have been considered in the optimization and complex system theory; gradient-free and equation-free.
+
+Given a stochastic dynamic model (partially observed Markov processes), sequential Montecarlo is used to derive the log likelihood function. This means only path simulations are needed. This is done through iterated filtering contained in the R Software Package *POMP*. If identifiability issues are encountered further assumptions might resolve that issue. Otherwise, profile likelihood will aid in parameter estimation and identifiability. The model has force of infection as
+$$ \mu_{SE}(t)= \frac{\beta (t)(I+i)^\alpha}{N(t)}$$
+where $\beta (t)$ is the transmission rate which is seasonally forced to match the school year.
+
+With the refinement in modeling tools, we are better equipped to describe the dynamics of measles, mostly separately since the transitions between the episodic and endemics dynamics, is not well understood. Before mass vaccination measles displayed regular endemic cycles which later changed to irregular ones. Most models using the normal SEIR setup and seasonal variation of transmission rate account for this transitions by endogenous dynamical reasons, such as chaos and stochastic shifts in existing stable cycles. This makes predicting transitions almost impossible. But the realization that susceptible replenishment rate affects the disease dynamics gives us a credible and exogenous factor which aids in predicting transitions. This is taken for granted when a constant birth rate is used in models for it ignores slow changes in this parameter. With the appropriate seasonal forcing of transmission rates (i.e. term time forcing), a simple SEIR framework well explains the disease dynamics without a complex age-structured host model [2].
+
+
+
+
+
+
+
+
+# References

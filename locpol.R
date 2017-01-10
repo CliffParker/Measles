@@ -1,5 +1,7 @@
-
+# I created this function for local polynonmial regression this should be a good
+# Estimate to the real deal as much as possible
 lr = function(Data,h){
+  #h is the bandwith
   n=dim(Data)[1]
   sd = sqrt(var(Data$X))
   
@@ -27,5 +29,5 @@ lr = function(Data,h){
   return(Output)
 }
 
-Data = data.frame(X = 1:20, Y = sin(1:20))
-lr(Data,.3)
+#Data = data.frame(X = 1:20, Y = sin(1:20))
+#lr(Data,.3)

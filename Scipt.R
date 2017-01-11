@@ -99,17 +99,11 @@ fit.loess$kd
 require(locpol)# Package for estimating the parameters of local regression.
 d <- data.frame(X = NewData2$CIncidence)
 d$Y <- NewData2$CBirths
-h <- denCVBwSelC(log(d$X), kernel = gaussK)
-xeval <- log(d$X)
-lpest1 <- locPolSmootherC(log(d$X),log(d$Y) , xeval, bw = h , 1, gaussK)
-mean(lpest1$beta1[-c(1,2)])
-lpest1
-plot(log(d$X),log(d$Y))
-
-attach(lpest1)
-dev = beta1 * exp(beta0) * (x)^(beta1 - 1)
-finalData = cbind(x, dev, Resid.loess)[-(1:2),]
-tail(finalData)
+h <- denCVBwSelC(d$X, kernel = gaussK)
+xeval <- d$X
+lpest1 <- locPolSmootherC(d$X,d$Y , xeval, bw = .3 * sd , deg = 1, gaussK)
+plot(d$X,d$Y)
+lpest2 <- locpol(d$Y ~d$X, data = d, bw = .3 * sd , kernel = gaussK, deg = 1, xeval = d$X)
 
 
 

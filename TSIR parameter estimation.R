@@ -1,5 +1,7 @@
-
-parset = function(alpha1 = 1, zeta =1.573e-6, Z0 = 5005.874, I0 =11673.423, rmod = rep(.2,26),dta = Data){
+#Packages
+require(pracma)
+#Cost function
+parcost = function(alpha1 = 1, zeta =1.573e-6, Z0 = 5005.874, I0 =11673.423, rmod = rep(.2,26),dta = Data){
 
   r = rep(NA,226)
   rmod = 1:26
@@ -18,14 +20,21 @@ parset = function(alpha1 = 1, zeta =1.573e-6, Z0 = 5005.874, I0 =11673.423, rmod
   
 }
 
-
-require(pracma)
-Model_fit=function(){
-  estpars<- fminsearch(parset, pars <- c( alpha1 = 1, 
-            zeta = 1.573e-6, Z0 =5005.874, I0 = 11673.423, rmod = rep(.2,26)), 
-            minimize = TRUE, dfree = TRUE,
-                       maxiter = 1000, tol = .Machine$double.eps^(2/3))
+#Parameter estimation section
+Model_fit=function(par = c( alpha1 = 1, 
+                            zeta = 1.573e-6, Z0 =5005.874, I0 = 11673.423, rmod = rep(.2,26))){
+  estpars<- fminsearch(parcost, pars <- par, 
+            minimize = T, dfree = F,
+                       maxiter = 1000, tol = .Machine$double.xmin)
   return(estpars)
 }
 
-Model_fit()
+#Iterative parameter estimation
+Fitit = function(n){
+  est = Model_fit()$xval
+  for(i in 1:n){
+    est = Model_fit(est)$xval
+  }
+  return(Model_fit(est))
+}
+

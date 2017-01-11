@@ -127,9 +127,9 @@ Data[,11] = c( NA, Data[,9])[1:226]
 colnames(Data)[c(1:2,8,9,10,11)] = c("C","B","Z","I","Zt-1","It-1")
 
 
+source('~/GitHub/Measles/TSIR parameter estimation.R', echo=F)
 
-
-
+Fitit(10) 
 
 
 

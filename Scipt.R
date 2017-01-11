@@ -107,20 +107,24 @@ lpest1
 plot(log(d$X),log(d$Y))
 
 attach(lpest1)
-dev = beta1 * exp(beta0) * (X)^(beta1 - 1)
-finalData = cbind(X, dev, Resid.loess)[-(1:2),]
+dev = beta1 * exp(beta0) * (x)^(beta1 - 1)
+finalData = cbind(x, dev, Resid.loess)[-(1:2),]
 tail(finalData)
 
-finalData
 
-source('~/GitHub/Measles/Scipt.R')
+
+source('~/GitHub/Measles/locpol.R')
  mylr = lr(d,.3)
 
 plot(mylr$resd)
 
+#A Data needed is in Fdat.d and mylr
 
-
-
+Data = data.frame( Fdat.d[,-3], mylr )
+Data[,9] = Data[,1] * Data[,6]
+Data[,10] = c( NA, Data[,8])[1:226]
+Data[,11] = c( NA, Data[,9])[1:226]
+colnames(Data)[c(1:2,8,9,10,11)] = c("C","B","Z","I","Zt-1","It-1")
 
 
 

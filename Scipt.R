@@ -99,33 +99,31 @@ fit.loess$kd
 require(locpol)# Package for estimating the parameters of local regression.
 d <- data.frame(X = NewData2$CIncidence)
 d$Y <- NewData2$CBirths
-h <- denCVBwSelC(log(d$X), kernel = gaussK)
-xeval <- log(d$X)
-lpest1 <- locPolSmootherC(log(d$X),log(d$Y) , xeval, bw = h , 1, gaussK)
-mean(lpest1$beta1[-c(1,2)])
-lpest1
-plot(log(d$X),log(d$Y))
+h <- denCVBwSelC(d$X, kernel = gaussK)
+xeval <- d$X
+lpest1 <- locPolSmootherC(d$X,d$Y , xeval, bw = .3 * sd , deg = 1, gaussK)
+plot(d$X,d$Y)
+lpest2 <- locpol(d$Y ~d$X, data = d, bw = .3 * sd , kernel = gaussK, deg = 1, xeval = d$X)
 
-attach(lpest1)
-dev = beta1 * exp(beta0) * (X)^(beta1 - 1)
-finalData = cbind(X, dev, Resid.loess)[-(1:2),]
-tail(finalData)
 
-finalData
 
-source('~/GitHub/Measles/Scipt.R')
+source('~/GitHub/Measles/locpol.R')
  mylr = lr(d,.3)
 
 plot(mylr$resd)
 
+#A Data needed is in Fdat.d and mylr
+
+Data = data.frame( Fdat.d[,-3], mylr )
+Data[,9] = Data[,1] * Data[,6]
+Data[,10] = c( NA, Data[,8])[1:226]
+Data[,11] = c( NA, Data[,9])[1:226]
+colnames(Data)[c(1:2,8,9,10,11)] = c("C","B","Z","I","Zt-1","It-1")
 
 
+source('~/GitHub/Measles/TSIR parameter estimation.R', echo=F)
 
-
-
-
-
-
+Fitit(10) 
 
 
 

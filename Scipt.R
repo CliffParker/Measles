@@ -1,4 +1,6 @@
-# My script
+###############################################################################################
+##########################    DATA      CREATION    ###########################################
+###############################################################################################
 
 
 t = seq(0,9, by = 9/(468))[1:(468)] 
@@ -48,21 +50,33 @@ Cumulative = function(Data){
 }
 
 
-#A subset of the Dataset can be seen from the Data below, with time, Culmulative Incidence, Culmulative Birth and Culmulative Error.
+#A subset of the Dataset can be seen from the Data below, with time,
+#Culmulative Incidence, Culmulative Birth and Culmulative Error.
 
-Fdat = Biweekly(NewData)
-
+Fdat = Biweekly(NewData)# Biweekly data
 sigmaU = 1
 set.seed(143)
 U = rnorm(226,0,sd=sigmaU)
-Fdat.d = cbind(Fdat[-(227:234),1],Fdat[-(1:8),2],U)
-
-Fdat1 = Cumulative(Fdat.d) # Adjusting for the  delay caused by maternal immunity
+Fdat.d = cbind(Fdat[-(227:234),1],Fdat[-(1:8),2],U) # Adjusting for the  delay caused by maternal immunity
+# U added was for error, can be ignored
+Fdat1 = Cumulative(Fdat.d) # Cumulated table
 
 NewData1 = cbind(Time=time,CIncidence=Fdat1[,1],CBirths=Fdat1[,2], U=Fdat1[,3])
 
 NewData2 = as.data.frame(NewData1 )
 head(NewData2)
+#error incidence used above if just reports
+
+###############################################################################################
+##########################    DATA      CREATED    ############################################
+###############################################################################################
+
+
+
+
+###############################################################################################
+##########################    MODEL     FITTING    ############################################
+###############################################################################################
 
 fit <- lm(CBirths ~ CIncidence, data=NewData2)
 summary(fit) # show results
@@ -71,13 +85,6 @@ plot(predict(fit)~CIncidence, data = NewData2)
 
 confint(fit, level=0.95) # CIs for model parameters 
 anova(fit) # anova table 
-# covariance matrix for model parameters 
-
-# diagnostic plots 
-layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page 
-plot(fit)
-
-
 
 
 #Below are plots of the estimated residuals both with noice and without noise.
@@ -93,31 +100,36 @@ summary(fit.loess) # show results
 
 Resid.loess=as.vector(fit.loess$residuals)+ NewData2$U# residuals
 plot(Resid.loess~time, type="o", col="blue")
-
 fit.loess$kd
 
 require(locpol)# Package for estimating the parameters of local regression.
 d <- data.frame(X = NewData2$CIncidence)
 d$Y <- NewData2$CBirths
-h <- denCVBwSelC(d$X, kernel = gaussK)
-xeval <- d$X
-lpest1 <- locPolSmootherC(d$X,d$Y , xeval, bw = .3 * sd , deg = 1, gaussK)
 plot(d$X,d$Y)
-lpest2 <- locpol(d$Y ~d$X, data = d, bw = .3 * sd , kernel = gaussK, deg = 1, xeval = d$X)
+sd = sqrt(var(d$X))
+lpest1 <- locPolSmootherC(d$X,d$Y , d$X, bw = .225 * sd , deg = 1, gaussK)
+lpest2 <- locpol(Y ~ X, data = d, bw = .225 * sd , kernel = gaussK, deg = 1, xeval = d$X)
+lpest2$lpFit
+lpest2$residuals
 
+#My codes for Local regression analysis
+#######################################
+#source('~/GitHub/Measles/locpol.R')
+#mylr = lr(d,.3)
+#plot(mylr$resd)
+#######################################
+fitlp = lpest1$beta0 + lpest2$lpFit$Y1 * lpest2$lpFit[,1]
+fitlm = fitted.values(fit)
+mydat = data.frame(lpest2$lpFit[,1:2], b0=lpest1$beta0, b1=lpest2$lpFit$Y1, 
+                fit=fitlp, resd=lpest2$residuals, fitlm)
+###########################################################################
 
+#Data needed is in Fdat.d and mydat
 
-source('~/GitHub/Measles/locpol.R')
- mylr = lr(d,.3)
-
-plot(mylr$resd)
-
-#A Data needed is in Fdat.d and mylr
-
-Data = data.frame( Fdat.d[,-3], mylr )
-Data[,9] = Data[,1] * Data[,6]
-Data[,10] = c( NA, Data[,8])[1:226]
-Data[,11] = c( NA, Data[,9])[1:226]
+Data = data.frame( Fdat.d[,-3], mydat )
+Data[,9] = Data[,1] * Data[,6] #Creating I(t)
+Data[,10] = c( NA, Data[,8])[1:226] #Creating Z(t-1)
+Data[,11] = c( NA, Data[,9])[1:226] #Creating I(t-1)
 colnames(Data)[c(1:2,8,9,10,11)] = c("C","B","Z","I","Zt-1","It-1")
 
 
@@ -126,6 +138,37 @@ source('~/GitHub/Measles/TSIR parameter estimation.R', echo=F)
 Fitit(10) 
 
 
+
+
+SSE1 = function(h){
+  ESS = 0
+  d <- data.frame(X = NewData2$CIncidence)
+  d$Y <- NewData2$CBirths
+  sd = sqrt(var(d$X))
+  lpest1 <- locPolSmootherC(d$X,d$Y , d$X, bw = h * sd, deg = 1, gaussK)
+  lpest2 <- locpol(Y ~ X, data = d, bw = h * sd , kernel = gaussK, deg = 1, xeval = d$X)
+  ESS = sum(lpest2$residuals^2)
+  
+  return(ESS)
+}
+
+SSE2 = function(h){
+  ESS = 0
+  d <- data.frame(X = NewData2$CIncidence)
+  d$Y <- NewData2$CBirths
+  sd = sqrt(var(d$X))
+  fit <- lm(CBirths ~ CIncidence, data=NewData2)
+  lpest1 <- locPolSmootherC(d$X,d$Y , d$X, bw = h * sd, deg = 1, gaussK)
+  lpest2 <- locpol(Y ~ X, data = d, bw = h * sd , kernel = gaussK, deg = 1, xeval = d$X)
+  ESS = sum(lpest2$residuals^2)
+  error = fitted.values(fit) - ( lpest1$beta0 + lpest2$lpFit$Y1 * lpest2$lpFit[,1])
+  ESS1 = sum(error^2)
+  return(c(ESS/1e+12,ESS1/1e+15))
+}
+x = seq(.1,10,.01)
+y = sapply(x,SSE2)
+plot(y[2,] ~ x, type = "l", col = "red", xlab = "h", ylab = "SSE", ylim= c(0,15))
+lines(y[1,] ~ x, col = "blue")
 
 
 

@@ -1,7 +1,7 @@
 #Packages
 require(pracma)
 #Cost function
-parcost = function(alpha1 = 1, zeta =1.573e-6, Z0 = 5005.874, I0 =11673.423, rmod = rep(.2,26),dta = Data){
+parcost = function(alpha1 = 1, zeta =1.573e-6, Z0 = -11259.898, I0 =11389.669, rmod = rep(1.349859,26),dta = Data){
 
   r = rep(NA,226)
   rmod = 1:26
@@ -22,7 +22,7 @@ parcost = function(alpha1 = 1, zeta =1.573e-6, Z0 = 5005.874, I0 =11673.423, rmo
 
 #Parameter estimation section
 Model_fit=function(par = c( alpha1 = 1, 
-                            zeta = 1.573e-6, Z0 =5005.874, I0 = 11673.423, rmod = rep(.2,26))){
+                            zeta = 1.573e-6, Z0 = -11259.898, I0 = 11389.669, rmod = rep(1.349859,26))){
   estpars<- fminsearch(parcost, pars <- par, 
             minimize = T, dfree = F,
                        maxiter = 1000, tol = .Machine$double.xmin)

@@ -30,7 +30,7 @@ report=function(out, gamma = gamma){
 
 "MODEL"
 pars <- c(mub=14942, beta= 400, mu = 0.00029868, lambda = 3, gamma = 365/14
-          , va = 0, s = 50022238, e = 0, i = 3762, r = 0 , beta2 = .1, phi = .5)
+          , va = 0, s = 50022238, e = 0, i = 3762, r = 0 )
 #States as a vector with initial Conditions
 s = 50022238
 e = 0
@@ -147,20 +147,20 @@ newp<-parest(pars)
 #Maximum likelihood estimation
 
 
-log_likelihood=function(parameter,gamma,mu, sigma){
-  pars <- as.vector(parameter)
+log_likelihood=function(mub,beta,mud,lambda,gamma,va,s,e,i,r,mu, sigma){
   
+  pars <- as.vector()
   pars[5] = gamma
-  mub=pars[1]
-  beta=pars[2]
-  mu = pars[3] 
-  lambda = pars[4]
+  pars[1] = mub
+  pars[2] = beta
+  pars[3] = mud
+  pars[4] = lambda
   gamma = pars[5] 
-  va =pars[6] 
-  s = pars[7]
-  e = pars[8]
-  i = pars[9]
-  r = pars[10]
+  pars[6] = va
+  pars[7] =  s 
+  pars[8] = e
+  pars[9] = i
+  pars[10] = r
   n = s+e+i+r
   
   

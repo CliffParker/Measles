@@ -23,3 +23,6 @@ summary(fit)
 AIC(fit)
 BIC(fit)
 logLik(fit)
+
+
+

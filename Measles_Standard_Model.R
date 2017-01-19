@@ -1,8 +1,11 @@
-
+#WIP
+#Work on parameters for model fitting
 #Required Packages
 library(deSolve)
 require(pracma)
 require(FME)
+require(stats4)
+require(bbmle)
 
 #Data reading
 Data = read.table(file.choose())
@@ -62,8 +65,16 @@ times <- times[1:((469+1456)*7)] # 37 years in days  (length = 13475)
 #Realisation
 outt<- ode(y = state, times = times, func = sir_rhs, parms = pars)
 
-"Cost Function"
+
+
+
+
+
+
+"Cost Functions"
+
 least_squares=function(parameter, data){
+
   pars <- as.vector(parameter)
   
   mub=pars[1]
@@ -101,10 +112,9 @@ least_squares(pars,Data)
 # Does under the Sensitivity section is a much better parameter estimation
 "Test Minimizers Done"
 
-
 require(pracma)
 Model_fit=function(pars){
-  estpars<- fminsearch(least_squares, pars, minimize = TRUE, dfree = TRUE,
+  estpars<- fminsearch(least_squares, pars, minimize = TRUE, dfree = F,
                        maxiter = 10000, tol = .Machine$double.eps^(2/3))
   return(estpars)
 }
@@ -134,28 +144,84 @@ newp<-parest(pars)
 
 
 
+#Maximum likelihood estimation
 
 
+log_likelihood=function(parameter,gamma,mu, sigma){
+  pars <- as.vector(parameter)
+  
+  pars[5] = gamma
+  mub=pars[1]
+  beta=pars[2]
+  mu = pars[3] 
+  lambda = pars[4]
+  gamma = pars[5] 
+  va =pars[6] 
+  s = pars[7]
+  e = pars[8]
+  i = pars[9]
+  r = pars[10]
+  n = s+e+i+r
+  
+  
+  state <- c(S = s , E = e , I = i, R = r, N = n)
+  
+  #Model representation
+  
+  out <- ode(y = state, times = times, func = sir_rhs, parms = pars)
+  
+  OUT<- report(out,gamma)
+  OUT = OUT[-(1:1456)]
+  data = Data
+  
+  Resd =  data - OUT #Residuals assumed with mean 0
+  R = suppressWarnings(dnorm(Resd , mu, sigma, log = T))
+  -sum(R)
+  
+}
+
+ fit = mle(log_likelihood, start = list(parameter = pars, gamma = 365/14, mu = 0, sigma = 3.637182)
+                 , fixed = list(gamma = 365/14), nobs = 469)
+
+fit
+summary(fit)
+AIC(fit)
+BIC(fit)
+logLik(fit)
 
 
+######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
 "Sensitivity Analysis"
 ########################
+######################################################################################################
+#######################################################################################################
+#######################################################################################################
+#######################################################################################################
+
+
 
 gamma = 365/14
 
-pars <- c(mub=1.494186e+04 ,beta=600, mu=4.063994e-01, lambda=3.301226e+00 , gamma=365/14, va=3.281668e-01 ,  s = 5.002224e+07, e = 6.110677e-01, i = 3.762730e+03, r = 8.273809e-01,  beta2 = .9, phi = .5)
+pars <- c(mub=1.494186e+04 ,beta=600, mu=4.063994e-01, lambda=3.301226e+00 , gamma=365/14, 
+          va=3.281668e-01 ,  s = 5.002224e+07, e = 6.110677e-01, i = 3.762730e+03, r = 8.273809e-01, 
+          beta2 = .9, phi = .5)
 
 #SEIRR Gives the Model realisation weekly and appends the Dataframe with Observation (L)
 SEIRR<-function(pars){
+  #Initial Conditions
+  s = as.vector(pars[7])
+  e = as.vector(pars[8])
+  i = as.vector(pars[9])
+  r = as.vector(pars[10])
+  n = s+e+i+r 
+  
+  state <- c(S = s , E = e , I = i, R = r, N = n)
+  
   sir_rhs=function(t,state,pars){
-    
-    s = pars[7]
-    e = pars[8]
-    i = pars[9]
-    r = pars[10]
-    n = s+e+i+r 
-    
-    
+
     with(as.list(c(state, pars)),{
       #rates of change
       dS <- pars[1]*(1-pars[6])-pars[2]*S*I/N - pars[3]*S
@@ -170,9 +236,7 @@ SEIRR<-function(pars){
     })
   }
   
-  
-  state <- c(S = s , E = e , I = i, R = r, N = n)
-  
+
   times <- seq(0, 37, by = 37/((469+1456)*7) )[1:((469+1456)*7)]
   
   out <- ode(y = state, times = times, func = sir_rhs, parms = pars)
@@ -182,17 +246,16 @@ SEIRR<-function(pars){
   
   time <- seq(0, 37, by = 37/((469+1456)*7) )[1:((469+1456)*7)]
   timesD<- cbind(t=0:13474,time) 
-  ii <- which (timesD[,1] %in% seq(0, 13474, by = 7))
+  ii <- which (timesD[,1] %in% seq(0, 13474, by = 7)) #Picking up every 7th element
   
-  Dat <- cbind(new[ii,], L=report(out,gamma))[-(1:1456),]
+  Dat <- cbind(new[ii,], L=report(out,gamma))[-(1:1456),] # Excluding burn in period
   return(Dat)
 }
 
+#Sample output
 out <- SEIRR(pars)
 
 #time Dataset
-
-
 time <- seq(0, 37, by = 37/((469+1456)*7) )[1:((469+1456)*7)]
 timesD<- cbind(t=0:13474,time) 
 ii <- which (timesD[,1] %in% seq(0, 13474, by = 7))[-(1:1456)]

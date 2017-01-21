@@ -29,7 +29,7 @@ report=function(out, gamma = gamma){
 
 
 "MODEL"
-pars <- c(mub=14942, beta= 400, mu = 0.00029868, lambda = 3, gamma = 365/14
+pars <- c(mub=15000, beta= 40, mu = 0.00029868, lambda = 3, gamma = 365/14
           , va = 0, s = 50022238, e = 0, i = 3762, r = 0 )
 #States as a vector with initial Conditions
 s = 50022238
@@ -94,6 +94,22 @@ least_squares=function(parameter, data){
   
   #Model representation
   
+  sir_rhs=function(t,state,pars){
+    
+    with(as.list(c(state, pars)),{
+      #rates of change
+      
+      dS <- pars[1]*(1-pars[6])-pars[2]*S*I/N - pars[3]*S
+      dE <- pars[2]*S*I/N - (pars[4]+pars[3])*E
+      dI <- pars[4]*E - (pars[5]+pars[3])*I
+      dR <- pars[5]*I + pars[1]*pars[6] - pars[3]*R
+      dN <- pars[1] - pars[3]*N  
+      
+      
+      # return the rate of change
+      list(c(dS, dE, dI, dR, dN))
+    })
+  }
   out <- ode(y = state, times = times, func = sir_rhs, parms = pars)
   
   OUT<- report(out,gamma)
@@ -131,10 +147,11 @@ Error=function(X,Y){
 parest = function (pars){
   pars = pars
   estpars<-Model_fit(pars)$xval
-  while ( Error(least_squares(pars),least_squares(estpars))   > 0.05 * least_squares(pars)){
+  n = 1
+  while ( (Error(least_squares(pars),least_squares(estpars))   > 0.05 * least_squares(pars))|(n<=10)){
     pars<-estpars
     estpars<-Model_fit(pars)$xval
-    
+    n = n + 1
   }
   return(estpars)
 }
@@ -149,7 +166,7 @@ newp<-parest(pars)
 
 log_likelihood=function(mub,beta,mud,lambda,gamma,va,s,e,i,r,mu, sigma){
   
-  pars <- as.vector()
+  pars <- c()
   pars[5] = gamma
   pars[1] = mub
   pars[2] = beta
@@ -179,9 +196,9 @@ log_likelihood=function(mub,beta,mud,lambda,gamma,va,s,e,i,r,mu, sigma){
   -sum(R)
   
 }
-
- fit = mle(log_likelihood, start = list(parameter = pars, gamma = 365/14, mu = 0, sigma = 3.637182)
-                 , fixed = list(gamma = 365/14), nobs = 469)
+fit = mle(log_likelihood, start = list(mub=15000, beta= 400, mud = 0.00029868, lambda = 3, gamma = 365/14
+                                      , va = 0, s = 50022238, e = 0, i = 3762, r = 0, mu = 0, sigma = 3.637182)
+                , fixed = list(gamma = 365/14, mu = 0), lower = rep(0,10),method = "L-BFGS-B" , nobs = 469)
 
 fit
 summary(fit)
@@ -206,8 +223,7 @@ logLik(fit)
 gamma = 365/14
 
 pars <- c(mub=1.494186e+04 ,beta=600, mu=4.063994e-01, lambda=3.301226e+00 , gamma=365/14, 
-          va=3.281668e-01 ,  s = 5.002224e+07, e = 6.110677e-01, i = 3.762730e+03, r = 8.273809e-01, 
-          beta2 = .9, phi = .5)
+          va=3.281668e-01 ,  s = 5.002224e+07, e = 6.110677e-01, i = 3.762730e+03, r = 8.273809e-01)
 
 #SEIRR Gives the Model realisation weekly and appends the Dataframe with Observation (L)
 SEIRR<-function(pars){
@@ -273,11 +289,11 @@ SEIRRcost<- function(pars){
 
 
 #Parameter Estimation
-Fit <- modFit(f = SEIRRcost, p = pars, lower = rep(0,12), upper = c(rep(Inf,10),1,1) , method = "Port" )
+Fit <- modFit(f = SEIRRcost, p = pars, lower = rep(0,10), upper = c(rep(Inf,10)) )
 
 
 # Local Sensitivities
-Sfun<-sensFun(func = SEIRR, parms = pars, senspar = c(1:6,11,12))
+Sfun<-sensFun(func = SEIRR, parms = pars, senspar = c(1:6))
 summary(Sfun)
 plot(Sfun, which = c("L","S","E","I","R","N"), xlab ="time", lwd = 2)
 
@@ -292,7 +308,7 @@ abline(h = 20, col = "red")
 #Manual Iteration for parameter estimates
 pars = Fit$par
 gamma = pars[5]
-Fit <- modFit(f = SEIRRcost, p = pars, lower = rep(0,12), upper = c(rep(Inf,10),1,1) , method = "Marq")
+Fit <- modFit(f = SEIRRcost, p = pars, lower = rep(0,10), upper = c(rep(Inf,10)) )
 
 
 # Methods can be any of these c("Marq", "Port", "Newton","Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN","Pseudo", "bobyqa")

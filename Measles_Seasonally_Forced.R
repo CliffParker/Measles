@@ -10,7 +10,7 @@ require(bbmle)
 Data = read.table(file.choose())
 summary(Data)
 head(Data)
-Data = Data[1:469,2]
+Data = Data[1:469,2]/5.1e+07
 
 #Reporting Function
 report=function(out, gamma = gamma){
@@ -28,34 +28,42 @@ report=function(out, gamma = gamma){
 
 
 "MODEL"
-pars <- c(mub=14942, beta= 400, mu = 0.00029868, lambda = 3, gamma = 365/14,
-          va = 0, s = 50022238, e = 0, i = 3762, r = 0 , beta2 = .1, phi = .5)
-#States as a vector with initial Conditions
-s = 50022238
-e = 0
-i = 3762
-r = 0
-n = 50026000
-state <- c(S = s , E = e , I = i, R = r, N = n)
+pars <- c(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
+          va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5)
 
-sir_rhs=function(t,state,pars){
+
+pars <- as.vector(pars)
+
+
+
+  pars = as.vector(pars)
   
-  with(as.list(c(state, pars)),{
-    #rates of change
-    dS <-  pars[1]*(1-pars[6]) -  (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))/N  - pars[3]*S
-    dE <- (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))/N - (pars[4]+pars[3])*E
-    dI <- pars[4]*E - (pars[5]+pars[3])*I
-    dR <- pars[5]*I + (pars[1]*pars[6]) - pars[3]*R
-    dN <- pars[1] - pars[3]*N  
+  #Initial Conditions
+  s = as.vector(pars[7])
+  e = as.vector(pars[8])
+  i = as.vector(pars[9])
+  r = as.vector(pars[10])
+  n = s+e+i+r 
+  
+  state <- c(S = s , E = e , I = i, R = r, N = n)
+  
+  
+  sir_rhs=function(t,state,pars){
     
-    # return the rate of change
-    list(c(dS, dE, dI, dR, dN))
-  })
-}
-
-#times as a vector
-o=37/((469+1456)*7)  # A day in 37 years
-
+    
+    with(as.list(c(state, pars)),{
+      #rates of change
+      dS <-  pars[1]*(1-pars[6]) -  (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))  - pars[3]*S
+      dE <- (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12])))) - (pars[4]+pars[3])*E
+      dI <-  pars[4]*E - (pars[5]+pars[3])*I
+      dR <- pars[5]*I + (pars[1]*pars[6]) - pars[3]*R
+      dN <- pars[1] - pars[3]*N  
+      
+      # return the rate of change
+      return(list(c(dS, dE, dI, dR, dN)))
+    })
+  }
+o = 37/((469+1456)*7)          
 times <- seq(0, 37, by = o)
 times <- times[1:((469+1456)*7)] # 37 years in days  (length = 13475)
 
@@ -87,16 +95,17 @@ least_squares=function(parameter, data){
   
   sir_rhs=function(t,state,pars){
     
+    
     with(as.list(c(state, pars)),{
       #rates of change
-      dS <-  pars[1]*(1-pars[6]) -  (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))/N  - pars[3]*S
-      dE <- (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))/N - (pars[4]+pars[3])*E
-      dI <- pars[4]*E - (pars[5]+pars[3])*I
+      dS <-  pars[1]*(1-pars[6]) -  (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))  - pars[3]*S
+      dE <- (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12])))) - (pars[4]+pars[3])*E
+      dI <-  pars[4]*E - (pars[5]+pars[3])*I
       dR <- pars[5]*I + (pars[1]*pars[6]) - pars[3]*R
       dN <- pars[1] - pars[3]*N  
       
       # return the rate of change
-      list(c(dS, dE, dI, dR, dN))
+      return(list(c(dS, dE, dI, dR, dN)))
     })
   }
   
@@ -184,18 +193,21 @@ log_likelihood=function(mub,beta,mud,lambda,gamma,va,s,e,i,r, beta2, phi, mu, si
   
   sir_rhs=function(t,state,pars){
     
+    
     with(as.list(c(state, pars)),{
       #rates of change
-      dS <-  pars[1]*(1-pars[6]) -  (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))/N  - pars[3]*S
-      dE <- (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))/N - (pars[4]+pars[3])*E
-      dI <- pars[4]*E - (pars[5]+pars[3])*I
+      dS <-  pars[1]*(1-pars[6]) -  (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))  - pars[3]*S
+      dE <- (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12])))) - (pars[4]+pars[3])*E
+      dI <-  pars[4]*E - (pars[5]+pars[3])*I
       dR <- pars[5]*I + (pars[1]*pars[6]) - pars[3]*R
       dN <- pars[1] - pars[3]*N  
       
       # return the rate of change
-      list(c(dS, dE, dI, dR, dN))
+      return(list(c(dS, dE, dI, dR, dN)))
     })
   }
+  
+  times <- seq(0, 37, by = 37/((469+1456)*7) )[1:((469+1456)*7)]
   
   out <- ode(y = state, times = times, func = sir_rhs, parms = pars)
   
@@ -207,9 +219,8 @@ log_likelihood=function(mub,beta,mud,lambda,gamma,va,s,e,i,r, beta2, phi, mu, si
   -sum(R)
 }
 
-fit = mle(log_likelihood, start = list(mub=15000, beta= 400, mud = 0.00029868, lambda = 3, gamma = 365/14
-                                       , va = 0, s = 50022238, e = 0, i = 3762, r = 0,
-                                       beta2 = .1, phi = .5,  mu = 0, sigma = 3.637182)
+fit = mle(log_likelihood, start = list(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
+                                       va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5,  mu = 0, sigma = 3.637182)
           , fixed = list(gamma = 365/14, mu = 0, va = 0), lower = rep(0,12),method = "L-BFGS-B" , nobs = 469)
 
 fit
@@ -239,27 +250,28 @@ logLik(fit)
 
 gamma = 365/14
 
-pars <- c(mub=1.494186e+04 ,beta=600, mu=4.063994e-01, lambda=3.301226e+00 , gamma=365/14, 
-          va=3.281668e-01 ,  s = 5.002224e+07, e = 6.110677e-01, i = 3.762730e+03, r = 8.273809e-01, 
-          beta2 = .9, phi = .5)
+pars <- c(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
+          va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5)
 #SEIRR Gives the Model realisation weekly and appends the Dataframe with Observation (L)
 SEIRR<-function(pars){
+  pars = as.vector(pars)
+  #Initial Conditions
+  s = as.vector(pars[7])
+  e = as.vector(pars[8])
+  i = as.vector(pars[9])
+  r = as.vector(pars[10])
+  n = s+e+i+r 
+  
+  state <- c(S = s , E = e , I = i, R = r, N = n)
+  
   sir_rhs=function(t,state,pars){
-    #Initial Conditions
-    s = as.vector(pars[7])
-    e = as.vector(pars[8])
-    i = as.vector(pars[9])
-    r = as.vector(pars[10])
-    n = s+e+i+r 
-    
-    state <- c(S = s , E = e , I = i, R = r, N = n)
     
     
     with(as.list(c(state, pars)),{
       #rates of change
-      dS <-  pars[1]*(1-pars[6]) -  (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))/N  - pars[3]*S
-      dE <- (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))/N - (pars[4]+pars[3])*E
-      dI <- pars[4]*E - (pars[5]+pars[3])*I
+      dS <-  pars[1]*(1-pars[6]) -  (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12]))))  - pars[3]*S
+      dE <- (S*I*pars[2]*(1 + pars[11]*cos(2*pi*(t - pars[12])))) - (pars[4]+pars[3])*E
+      dI <-  pars[4]*E - (pars[5]+pars[3])*I
       dR <- pars[5]*I + (pars[1]*pars[6]) - pars[3]*R
       dN <- pars[1] - pars[3]*N  
       

@@ -196,9 +196,16 @@ log_likelihood=function(mub,beta,mud,lambda,gamma,va,s,e,i,r,mu, sigma){
   -sum(R)
   
 }
+<<<<<<< Updated upstream
 fit = mle(log_likelihood, start = list(mub=15000, beta= 400, mud = 0.00029868, lambda = 3, gamma = 365/14
                                       , va = 0, s = 50022238, e = 0, i = 3762, r = 0, mu = 0, sigma = 3.637182)
                 , fixed = list(gamma = 365/14, mu = 0), lower = rep(0,10),method = "L-BFGS-B" , nobs = 469)
+=======
+
+ fit = mle(log_likelihood, start = list(mub=15000, beta= 400, mud = 0.00029868, lambda = 3, gamma = 365/14
+                                        , va = 0, s = 50022238, e = 0, i = 3762, r = 0, mu = 0, sigma = 3.637182)
+                 , fixed = list(gamma = 365/14, mu = 0), lower = rep(0,10), nobs = 469)
+>>>>>>> Stashed changes
 
 fit
 summary(fit)

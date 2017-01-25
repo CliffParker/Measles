@@ -8,10 +8,9 @@ require(bbmle)
 
 #Data reading
 Data = read.table(file.choose())
+Data = Data[1:469,2]/5.1e+07
 summary(Data)
 head(Data)
-Data = Data[1:469,2]/5.1e+07
-
 #Reporting Function
 report=function(out, gamma = gamma){
   I= out[,4]
@@ -108,7 +107,7 @@ least_squares=function(parameter, data){
       return(list(c(dS, dE, dI, dR, dN)))
     })
   }
-  
+  times <- seq(0, 37, by = 37/((469+1456)*7) )[1:((469+1456)*7)]
   out <- ode(y = state, times = times, func = sir_rhs, parms = pars)
   
   OUT<- report(out,gamma)

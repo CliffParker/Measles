@@ -5,12 +5,17 @@ require(pracma)
 require(FME)
 require(stats4)
 require(bbmle)
+require(ggplot2)
 
 #Data reading
 Data = read.table(file.choose())
 Data = Data[1:469,2]/5.1e+07
 summary(Data)
 head(Data)
+
+ggplot(data = DataT, mapping = aes(x =time, y = L) )+ geom_line()+ ggtitle("Reported cases")+xlab("time")+ylab("Density")
+
+
 #Reporting Function
 report=function(out, gamma = gamma){
   I= out[,4]
@@ -27,7 +32,7 @@ report=function(out, gamma = gamma){
 
 
 "MODEL"
-pars <- c(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
+pars <- c(mub=1.2/60, beta= 600, mud = 1/60, lambda = 365/10, gamma = 365/14,
           va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5)
 
 
@@ -67,7 +72,7 @@ times <- seq(0, 37, by = o)
 times <- times[1:((469+1456)*7)] # 37 years in days  (length = 13475)
 
 #Realisation
-outt<- ode(y = state, times = times, func = sir_rhs, parms = pars)
+outt<- ode(y = state, times = times, func = sir_rhs, parms = pars, method = "ode45")
 
 "Cost Function"
 least_squares=function(parameter, data){
@@ -108,7 +113,7 @@ least_squares=function(parameter, data){
     })
   }
   times <- seq(0, 37, by = 37/((469+1456)*7) )[1:((469+1456)*7)]
-  out <- ode(y = state, times = times, func = sir_rhs, parms = pars)
+  out <- ode(y = state, times = times, func = sir_rhs, parms = pars,method="ode45")
   
   OUT<- report(out,gamma)
   OUT = OUT[-(1:1456)]
@@ -127,10 +132,31 @@ least_squares(pars,Data)
 "Test Minimizers Done"
 
 
+
+
+
+
+pars <-  c(beta= 600, beta2 = .2, phi = .5)
+
+
+least = function(par){
+  x=par[1]
+  y=par[2]
+  z=par[3]
+  
+  pars <- c(mub=1.2/60, beta= x, mud = 1/60, lambda = 365/10, gamma = 365/14,
+            va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = y, phi = z)
+  R <-least_squares(pars,Data)
+  return(R)
+}
+
+
+
+
+
 require(pracma)
 Model_fit=function(pars){
-  estpars<- fminsearch(least_squares, pars, minimize = TRUE, dfree = F,
-                       maxiter = 10000, tol = .Machine$double.eps^(2/3))
+  estpars<- optim(pars, least , lower = c(0,0,0), upper = c(1000,1,1), method = "L-BFGS-B")
   return(estpars)
 }
 
@@ -147,9 +173,9 @@ parest = function (pars){
   pars = pars
   estpars<-Model_fit(pars)$xval
   n = 1
-  while ( (Error(least_squares(pars),least_squares(estpars))   > 0.05 * least_squares(pars))|(n<=10)){
+  while ( (Error(least(pars),least(estpars))   > 0.05 * least_squares(pars))|(n<=10)){
     pars<-estpars
-    estpars<-Model_fit(pars)$xval
+    estpars<-Model_fit(pars)$par
     n = n + 1
   }
   return(estpars)
@@ -218,9 +244,17 @@ log_likelihood=function(mub,beta,mud,lambda,gamma,va,s,e,i,r, beta2, phi, mu, si
   -sum(R)
 }
 
-fit = mle(log_likelihood, start = list(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
-                                       va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5,  mu = 0, sigma = 3.637182)
-          , fixed = list(gamma = 365/14, mu = 0, va = 0), lower = rep(0,12),method = "L-BFGS-B" , nobs = 469)
+fit = mle2(log_likelihood, start = list(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
+                                       va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5,  mu = 0, sigma = 7.541453e-06)
+          , fixed = list(gamma = 365/14, mu = 0, va = 0), lower = rep(0,11), 
+          upper = list(mub=1,beta=1e+3,mud=1,lambda=100,s=1,e=1,i=1,r=1,beta2=1,phi=1,sigma=7.541453e-06),method = "L-BFGS-B" )
+
+
+fit = mle2(log_likelihood, start = list(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
+                                        va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5,  mu = 0, sigma = 7.541453e-07)
+           , fixed = list(gamma = 365/14, mu = 0, va = 0),method = "Nelder-Mead" )
+
+
 
 fit
 summary(fit)
@@ -253,7 +287,8 @@ pars <- c(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
           va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5)
 #SEIRR Gives the Model realisation weekly and appends the Dataframe with Observation (L)
 SEIRR<-function(pars){
-  pars = as.vector(pars)
+  #parms[names(P)] <- P
+  #pars = as.vector(pars)
   #Initial Conditions
   s = as.vector(pars[7])
   e = as.vector(pars[8])
@@ -296,7 +331,7 @@ SEIRR<-function(pars){
 }
 
 out <- SEIRR(pars)
-
+ggplot(data=subset(out1, out1$variable == c("S","I")) ,mapping=aes(x=time,y=value , color = variable))+geom_line()+ylab("Density") +xlab("time")+ggtitle("Trajectory of States")+facet_wrap("variable")
 #time Dataset
 
 
@@ -316,14 +351,25 @@ SEIRRcost<- function(pars){
 }
 
 
+
+fit = mle2(log_likelihood, start = list(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
+                                        va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5,  mu = 0, sigma = 7.541453e-06)
+           , fixed = list(gamma = 365/14, mu = 0, va = 0), lower = rep(0,11), 
+           upper = list(mub=1,beta=1e+3,mud=1,lambda=100,s=1,e=1,i=1,r=1,beta2=1,phi=1,sigma=7.541453e-06),method = "L-BFGS-B" )
+
+
+
+
 #Parameter Estimation
-Fit <- modFit(f = SEIRRcost, p = pars, lower = rep(0,12), upper = c(rep(Inf,10),1,1)  )
+Fit <- modFit(f = SEIRRcost, p = pars, lower = rep(0,12), upper = c(1,1e+3,1,100,100,0,1,1,1,1,1,1)  )
 
 
 # Local Sensitivities
 Sfun<-sensFun(func = SEIRR, parms = pars, senspar = c(1:6,11,12))
 summary(Sfun)
 plot(Sfun, which = c("L","S","E","I","R","N"), xlab ="time", lwd = 2)
+SS = melt(Sfun, id.vars = c("x","var"))
+ggplot(data=SS,mapping=aes(x=x,y=value,color=variable,linetype=variable))+geom_line()+facet_wrap(~var)+xlab("Time")+ylab("Sensitivity")+ggtitle("Sentitiviy to parameters ")
 
 # Identifiability of parameters
 ident <- collin(Sfun)

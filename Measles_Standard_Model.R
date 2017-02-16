@@ -6,6 +6,7 @@ require(pracma)
 require(FME)
 require(stats4)
 require(bbmle)
+require(ggplot2)
 
 #Data reading
 Data = read.table(file.choose())
@@ -28,7 +29,7 @@ report=function(out, gamma = gamma){
 
 
 "MODEL"
-pars <- c(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
+pars <- c(mub=1.5/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
           va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 )
 
 #States as a vector with initial Conditions
@@ -73,7 +74,7 @@ outt<- ode(y = state, times = times, func = sir_rhs, parms = pars)
 
 "Cost Functions"
 
-least_squares=function(parameter, data){
+least_squares=function(parameter){
 
   pars <- as.vector(parameter)
   
@@ -121,7 +122,7 @@ least_squares=function(parameter, data){
   return(ESS)
 }
 
-least_squares(pars,Data)
+least_squares(pars)
 
 # I initialy use the next set of wriiten codes for my least sqaure minimization, However
 #Using the fminsearch() of the pracma package doesnt allow putting putting a bound on the parameters 
@@ -131,7 +132,7 @@ least_squares(pars,Data)
 require(pracma)
 Model_fit=function(pars){
   estpars<- fminsearch(least_squares, pars, minimize = TRUE, dfree = F,
-                       maxiter = 10000, tol = .Machine$double.eps^(2/3))
+                       maxiter = 1e+6, tol = .Machine$double.xmin^(2))
   return(estpars)
 }
 
@@ -286,7 +287,7 @@ SEIRR<-function(pars){
 
 #Sample output
 out <- SEIRR(pars)
-
+ggplot(data=out ,mapping=aes(x=time,y=I ))+geom_line()+ylab("I(t)") +xlab("t")+ggtitle("Trajectory")
 #time Dataset
 time <- seq(0, 37, by = 37/((469+1456)*7) )[1:((469+1456)*7)]
 timesD<- cbind(t=0:13474,time) 
@@ -311,8 +312,12 @@ Fit <- modFit(f = SEIRRcost, p = pars, lower = rep(0,10), upper = c(rep(Inf,10))
 # Local Sensitivities
 Sfun<-sensFun(func = SEIRR, parms = pars, senspar = c(1:6))
 summary(Sfun)
-plot(Sfun, which = c("L","S","E","I","R","N"), xlab ="time", lwd = 2)
 
+melt(Sfun,id.vars=c("x","var"))->SS
+
+
+plot(Sfun, which = c("L","S","E","I","R","N"), xlab ="time", lwd = 2)
+ggplot(data=SS,mapping=aes(x=x,y=value,color=variable,linetype=variable))+geom_line()+facet_wrap(~var)+xlab("Time")+ylab("Sensitivity")+ggtitle("Sentitiviy to parameters ")
 # Identifiability of parameters
 ident <- collin(Sfun)
 ident

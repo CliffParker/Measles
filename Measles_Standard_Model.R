@@ -7,7 +7,7 @@ require(FME)
 require(stats4)
 require(bbmle)
 require(ggplot2)
-
+require(plyr)
 #Data reading
 Data = read.table(file.choose())
 Data = Data[1:469,2]/5.1e+07
@@ -66,9 +66,11 @@ times <- times[1:((469+1456)*7)] # 37 years in days  (length = 13475)
 #Realisation
 outt<- ode(y = state, times = times, func = sir_rhs, parms = pars)
 
+out = as.data.frame(outt)
 
-
-
+ggplot(out, aes(x=time,y=I)) + 
+    geom_line() + ggtitle("Standard SEIR Model") + 
+    xlab("time") + ylab("cases") + theme_bw()
 
 
 
@@ -281,7 +283,7 @@ SEIRR<-function(pars){
   timesD<- cbind(t=0:13474,time) 
   ii <- which (timesD[,1] %in% seq(0, 13474, by = 7)) #Picking up every 7th element
   
-  Dat <- cbind(new[ii,], L=report(out,gamma))[-(1:1456),] # Excluding burn in period
+  Dat <- cbind(new[ii,], L=report(out,gamma))#[-(1:1456),] # Excluding burn in period
   return(Dat)
 }
 
@@ -317,7 +319,8 @@ melt(Sfun,id.vars=c("x","var"))->SS
 
 
 plot(Sfun, which = c("L","S","E","I","R","N"), xlab ="time", lwd = 2)
-ggplot(data=SS,mapping=aes(x=x,y=value,color=variable,linetype=variable))+geom_line()+facet_wrap(~var)+xlab("Time")+ylab("Sensitivity")+ggtitle("Sentitiviy to parameters ")
+ggplot(data=SS,mapping=aes(x=x,y=value,color=variable,linetype=variable))+
+  geom_line()+facet_wrap(~var)+xlab("Time")+ylab("Sensitivity")+ggtitle("Sentitiviy to parameters ")+ theme_bw()
 # Identifiability of parameters
 ident <- collin(Sfun)
 ident

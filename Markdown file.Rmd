@@ -78,7 +78,7 @@ Before we discuss and compare the existing models for measles dynamics, let’s 
 
 # Measles
 
-Measles is an infectious childhood disease caused by the ravioli virus of the Morbilli group of viruses. The mode of infection can be airborne (coughs and sneezes from an infected person), and also through direct contact to infected or exposed objects. The virus is infectious when it comes into contact with nose, mouth, eyes and skin. This makes it highly contagious.
+Measles is an infectious childhood disease caused by the single- stranded RNA ravioli virus of the Morbilli group of viruses. The mode of infection can be airborne (coughs and sneezes from an infected person), and also through direct contact to infected or exposed objects. The virus is infectious when it comes into contact with nose, mouth, eyes and skin. This makes it highly contagious.
 7-18 days after exposure, symptoms are manifested. Thus the length of the exposed period is usually 8-10 days. The length of the infectious period is 8 days and this is between 4 days after the rush starts till 4 days after the rush. other symptoms are:
 
  *  Fever anorexia, cough and irritability

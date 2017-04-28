@@ -13,7 +13,7 @@ Data = Data[1:469,2]/5.1e+07
 summary(Data)
 head(Data)
 
-ggplot(data = DataT, mapping = aes(x =time, y = L) )+ geom_line()+ ggtitle("Reported cases")+xlab("time")+ylab("Density")
+ggplot(data = DataT, mapping = aes(x =x, y = y) )+ geom_line()+ ggtitle("Reported cases")+xlab("time")+ylab("Density")+theme_bw()
 
 
 #Reporting Function
@@ -32,7 +32,7 @@ report=function(out, gamma = gamma){
 
 
 "MODEL"
-pars <- c(mub=1.2/60, beta= 600, mud = 1/60, lambda = 365/10, gamma = 365/14,
+pars <- c(mub=1.2/60, beta= 600, mud = 1/60, lambda = 365/10, gamma = 365/7,
           va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5)
 
 
@@ -283,8 +283,8 @@ logLik(fit)
 
 gamma = 365/14
 
-pars <- c(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/14,
-          va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .2, phi = .5)
+pars <- c(mub=1/60, beta= 600, mud = 1/60, lambda = 365/8, gamma = 365/7,
+          va = 0, s = 1/23, e = 0, i = 1e-4, r = 1-1/23-1e-4 , beta2 = .3, phi = .5)
 #SEIRR Gives the Model realisation weekly and appends the Dataframe with Observation (L)
 SEIRR<-function(pars){
   #parms[names(P)] <- P
@@ -326,13 +326,20 @@ SEIRR<-function(pars){
   timesD<- cbind(t=0:13474,time) 
   ii <- which (timesD[,1] %in% seq(0, 13474, by = 7))
   
-  Dat <- cbind(new[ii,], L=report(out,gamma))[-(1:1456),]
+  Dat <- cbind(new[ii,], L=report(out,gamma))[-(1:1200),]
   return(Dat)
 }
 
-out <- SEIRR(pars)
-ggplot(data=subset(out1, out1$variable == c("S","I")) ,mapping=aes(x=time,y=value , color = variable))+geom_line()+ylab("Density") +xlab("time")+ggtitle("Trajectory of States")+facet_wrap("variable")
-#time Dataset
+out1 <- SEIRR(pars)
+out1 <- data.frame(out1)
+plot(out1[,4], type="l")
+
+ggplot(data=out1 ,mapping=aes(x=time,y=I ))+geom_line()+ylab("I(t)") +xlab("t")+ggtitle("Forced SEIR Model")+ theme_bw()
+
+ggplot(out1, mapping=aes(x=time, y=I)) + 
+    geom_line() + ggtitle("title") + 
+    xlab("x") + ylab("y") + theme_bw() 
+    
 
 
 time <- seq(0, 37, by = 37/((469+1456)*7) )[1:((469+1456)*7)]
@@ -369,7 +376,8 @@ Sfun<-sensFun(func = SEIRR, parms = pars, senspar = c(1:6,11,12))
 summary(Sfun)
 plot(Sfun, which = c("L","S","E","I","R","N"), xlab ="time", lwd = 2)
 SS = melt(Sfun, id.vars = c("x","var"))
-ggplot(data=SS,mapping=aes(x=x,y=value,color=variable,linetype=variable))+geom_line()+facet_wrap(~var)+xlab("Time")+ylab("Sensitivity")+ggtitle("Sentitiviy to parameters ")
+ggplot(data=SS,mapping=aes(x=x,y=value,color=variable,linetype=variable))+geom_line()+
+  facet_wrap(~var)+xlab("Time")+ylab("Sensitivity")+ggtitle("Sentitiviy to parameters ") + theme_bw()
 
 # Identifiability of parameters
 ident <- collin(Sfun)
